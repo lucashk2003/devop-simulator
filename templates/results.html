@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Resultados Simulación #{{ sim.id }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-light">
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="text-center mb-4">Resultados Simulación #{{ sim.id }}</h1>
+            <div class="card mb-4">
+                <div class="card-header">Resumen de Métricas</div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <h3>{{ sim.results.lead_time_avg }} días</h3>
+                            <p class="text-muted">Lead Time Promedio</p>
+                        </div>
+                        <div class="col-md-4">
+                            <h3>{{ sim.results.defect_rate }}%</h3>
+                            <p class="text-muted">Tasa de Defectos</p>
+                        </div>
+                        <div class="col-md-4">
+                            <h3>{{ sim.results.deploy_success_rate }}%</h3>
+                            <p class="text-muted">Despliegues Exitosos</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <canvas id="leadTimeChart"></canvas>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <canvas id="defectsChart"></canvas>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12 mb-4">
+                    <canvas id="deploysChart"></canvas>
+                </div>
+            </div>
+
+            <div class="text-center">
+                <a href="/" class="btn btn-success btn-lg">Nueva Simulación</a>
+                <a href="/history" class="btn btn-secondary btn-lg">Ver Historial</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const sprintData = {{ sim.results.sprint_data|tojson }};
+
+new Chart(document.getElementById('leadTimeChart'), {
+    type: 'line',
+    data: {
+        labels: Array.from({length: {{ sim.params.num_sprints }}}, (_, i) => `Sprint ${i+1}`),
+        datasets: [{
+            label: 'Lead Time Promedio (días)',
+            data: sprintData.lead_times,
+            borderColor: '#0d6efd',
+            backgroundColor: 'rgba(13, 110, 253, 0.1)',
+            fill: true
+        }]
+    },
+    options: { responsive: true, scales: { y: { beginAtZero: true } } }
+});
+
+new Chart(document.getElementById('defectsChart'), {
+    type: 'bar',
+    data: {
+        labels: Array.from({length: {{ sim.params.num_sprints }}}, (_, i) => `Sprint ${i+1}`),
+        datasets: [{
+            label: 'Defectos por Sprint',
+            data: sprintData.defects,
+            backgroundColor: '#dc3545'
+        }]
+    },
+    options: { responsive: true }
+});
+
+new Chart(document.getElementById('deploysChart'), {
+    type: 'bar',
+    data: {
+        labels: Array.from({length: {{ sim.params.num_sprints }}}, (_, i) => `Sprint ${i+1}`),
+        datasets: [{
+            label: 'Despliegues Exitosos',
+            data: sprintData.deploys,
+            backgroundColor: '#198754'
+        }]
+    },
+    options: { responsive: true }
+});
+</script>
+</body>
+</html>
