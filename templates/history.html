@@ -15,9 +15,9 @@
                 <small>{{ sim.timestamp[:19] }}</small>
             </div>
             <p class="mb-1">
-                Devs: {{ sim.params.num_developers }} | 
-                Automatización: {{ (sim.params.automation_level*100)|int }}% | 
-                Bugs: {{ (sim.params.bug_probability*100)|int }}%
+				Devs: {{ sim.params['num_developers'] }} | 
+				Automatización: {{ (sim.params['automation_level']|float * 100)|int }}% | 
+				Bugs: {{ (sim.params['bug_probability']|float * 100)|int }}%
             </p>
         </a>
         {% endfor %}

@@ -60,7 +60,7 @@
                 <div class="card-body">
 					{% for sim in simulations %}
 						<a href="{{ url_for('results', sim_id=sim.id) }}" class="btn btn-outline-secondary btn-sm d-block mb-2">
-							{{ sim.timestamp[:16] }} - {{ sim.params.num_developers }} devs, {{ (sim.params.automation_level*100)|int }}% auto
+							{{ sim.timestamp[:16] }} - {{ sim.params['num_developers'] }} devs, {{ (sim.params['automation_level'] * 100)|int }}% auto
 						</a>
 					{% endfor %}
                 </div>

@@ -40,7 +40,14 @@ def get_simulations():
     cur.execute('SELECT id, timestamp, params FROM simulations ORDER BY timestamp DESC LIMIT 20')
     rows = cur.fetchall()
     conn.close()
-    return rows
+    
+    # Convertir el string JSON a diccionario real
+    simulations = []
+    for row in rows:
+        sim = dict(row)
+        sim['params'] = json.loads(sim['params'])
+        simulations.append(sim)
+    return simulations
 
 def get_simulation_by_id(sim_id):
     conn = get_conn()
@@ -49,10 +56,8 @@ def get_simulation_by_id(sim_id):
     row = cur.fetchone()
     conn.close()
     if row:
-        return {
-            'id': row['id'],
-            'timestamp': row['timestamp'],
-            'params': json.loads(row['params']),
-            'results': json.loads(row['results'])
-        }
+        sim = dict(row)
+        sim['params'] = json.loads(sim['params'])
+        sim['results'] = json.loads(sim['results'])
+        return sim
     return None
