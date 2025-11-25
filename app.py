@@ -46,24 +46,52 @@ def simulate():
         defect_rates = [r['defect_rate'] for r in all_results]
         deploy_rates = [r['deploy_success_rate'] for r in all_results]
 
+        # === Recolectar datos de todos los sprints de todas las corridas ===
+        all_lead_times = []
+        all_defects = []
+        all_deploys = []
+        all_velocity = []
+        all_debt = []
+
+        for result in all_results:
+            sd = result['sprint_data']
+            all_lead_times.append(sd['lead_times'])
+            all_defects.append(sd['defects'])
+            all_deploys.append(sd['deploys'])
+            all_velocity.append(sd['velocity'])
+            all_debt.append(sd['debt'])
+
+        # Transponer: sprint 1 de todas las corridas, sprint 2, etc.
+        mean_lead = [round(np.mean(sprint), 2) for sprint in zip(*all_lead_times)]
+        std_lead = [round(np.std(sprint), 2) for sprint in zip(*all_lead_times)]
+        mean_defects = [round(np.mean(sprint), 1) for sprint in zip(*all_defects)]
+        mean_deploys = [round(np.mean(sprint), 1) for sprint in zip(*all_deploys)]
+        mean_velocity = [round(np.mean(sprint), 1) for sprint in zip(*all_velocity)]
+        mean_debt = [round(np.mean(sprint), 1) for sprint in zip(*all_debt)]
+
         summary = {
             'batch_size': batch_size,
             'lead_time': {
-                'mean': round(np.mean(lead_times), 2),
-                'std': round(np.std(lead_times), 2),
-                'p95': round(np.percentile(lead_times, 95), 2),
-                'min': round(min(lead_times), 2),
-                'max': round(max(lead_times), 2)
+                'mean': round(np.mean([r['lead_time_avg'] for r in all_results]), 2),
+                'std': round(np.std([r['lead_time_avg'] for r in all_results]), 2),
+                'p95': round(np.percentile([r['lead_time_avg'] for r in all_results], 95), 2)
             },
-            'defect_rate': {
-                'mean': round(np.mean(defect_rates), 2),
-                'std': round(np.std(defect_rates), 2)
-            },
-            'deploy_success_rate': {
-                'mean': round(np.mean(deploy_rates), 2),
-                'std': round(np.std(deploy_rates), 2)
+            'defect_rate': {'mean': round(np.mean([r['defect_rate'] for r in all_results]), 2)},
+            'deploy_success_rate': {'mean': round(np.mean([r['deploy_success_rate'] for r in all_results]), 2)},
+            'avg_final_debt': round(np.mean([r['final_debt'] for r in all_results]), 1),
+            'avg_by_sprint': {
+                'lead_times_mean': mean_lead,
+                'lead_times_std': std_lead,
+                'defects_mean': mean_defects,
+                'deploys_mean': mean_deploys,
+                'velocity_mean': mean_velocity,
+                'debt_mean': mean_debt
             }
         }
+
+        # Para batch=1, mantener compatibilidad con gráficos antiguos
+        if batch_size == 1:
+            summary['sprint_data'] = all_results[0]['sprint_data']
         if batch_size == 1:
             # Guardamos también los datos por sprint para compatibilidad con gráficos
             summary['sprint_data'] = all_results[0]['sprint_data']
