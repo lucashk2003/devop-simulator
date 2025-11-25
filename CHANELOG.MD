@@ -5,6 +5,34 @@ Todas las cambios notables del proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),  
 y este proyecto adhieren a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [v0.2.0] - 2025-04-06 (pre-release) — Monte Carlo Real
+
+### Added
+- **Múltiples corridas Monte Carlo** en una sola ejecución (1 → 20.000 corridas).
+- Nuevo campo en el formulario: **Cantidad de corridas Monte Carlo**.
+- Una ejecución en batch = **una sola fila en la DB** (historial limpio y escalable).
+- Cálculo automático de estadísticas robustas:
+  - Media ± desviación estándar
+  - Percentil 95 del Lead Time
+  - Mínimo / máximo
+- Interfaz inteligente en resultados:
+  - Si es 1 corrida → gráficos por sprint (como antes)
+  - Si son >1 corridas → mensaje claro + métricas estadísticas (sin gráficos por sprint)
+- Columna `batch_size` en la base de datos + migración automática.
+- Límite seguro de 20.000 corridas por ejecución.
+- Badge visual en historial y resultados indicando cantidad de corridas.
+
+### Changed
+- `results_summary` reemplaza al antiguo `results` (mejor estructura).
+- `results.html` ahora detecta automáticamente si es batch o corrida simple.
+- `history.html` muestra cantidad de corridas con badge.
+
+### Fixed
+- Compatibilidad total hacia atrás: simulaciones antiguas siguen funcionando.
+- Evita errores en Jinja al intentar acceder a `sprint_data` en batches grandes.
+
+> **¡Ahora sí es un simulador Monte Carlo de verdad!** Listo para análisis estadístico serio.
+
 ## [v0.1.1] - 2025-04-05 (pre-release)
 
 ### Fixed

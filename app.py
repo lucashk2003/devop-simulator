@@ -28,10 +28,49 @@ def simulate():
             'tasks_per_sprint': int(request.form['tasks_per_sprint'])
         }
         
-        results = run_devops_simulation(params)
-        sim_id = save_simulation(params, results)
+        batch_size = int(request.form.get('batch_size', 1))
+        if batch_size < 1:
+            batch_size = 1
+        if batch_size > 20000:
+            flash("Máximo 20.000 corridas por ejecución")
+            batch_size = 20000
+
+        all_results = []
+        for _ in range(batch_size):
+            result = run_devops_simulation(params)
+            all_results.append(result)
+
+        # === Estadísticas agregadas ===
+        import numpy as np
+        lead_times = [r['lead_time_avg'] for r in all_results]
+        defect_rates = [r['defect_rate'] for r in all_results]
+        deploy_rates = [r['deploy_success_rate'] for r in all_results]
+
+        summary = {
+            'batch_size': batch_size,
+            'lead_time': {
+                'mean': round(np.mean(lead_times), 2),
+                'std': round(np.std(lead_times), 2),
+                'p95': round(np.percentile(lead_times, 95), 2),
+                'min': round(min(lead_times), 2),
+                'max': round(max(lead_times), 2)
+            },
+            'defect_rate': {
+                'mean': round(np.mean(defect_rates), 2),
+                'std': round(np.std(defect_rates), 2)
+            },
+            'deploy_success_rate': {
+                'mean': round(np.mean(deploy_rates), 2),
+                'std': round(np.std(deploy_rates), 2)
+            }
+        }
+        if batch_size == 1:
+            # Guardamos también los datos por sprint para compatibilidad con gráficos
+            summary['sprint_data'] = all_results[0]['sprint_data']
         
+        sim_id = save_simulation(params, summary, batch_size)
         return redirect(url_for('results', sim_id=sim_id))
+
     except Exception as e:
         flash(f"Error: {e}")
         return redirect('/')

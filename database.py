@@ -16,19 +16,29 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             timestamp TEXT,
             params TEXT,
-            results TEXT
+            batch_size INTEGER DEFAULT 1,
+            results_summary TEXT
         )
     ''')
+    # Migración automática para quienes ya tenían la DB vieja
+    try:
+        conn.execute("ALTER TABLE simulations ADD COLUMN batch_size INTEGER DEFAULT 1")
+    except sqlite3.OperationalError:
+        pass
+    try:
+        conn.execute("ALTER TABLE simulations ADD COLUMN results_summary TEXT")
+    except sqlite3.OperationalError:
+        pass
     conn.commit()
     conn.close()
 
-def save_simulation(params, results):
+def save_simulation(params, results_summary, batch_size=1):
     conn = get_conn()
     cursor = conn.cursor()
     cursor.execute('''
-        INSERT INTO simulations (timestamp, params, results)
-        VALUES (?, ?, ?)
-    ''', (datetime.now().isoformat(), json.dumps(params), json.dumps(results)))
+        INSERT INTO simulations (timestamp, params, batch_size, results_summary)
+        VALUES (?, ?, ?, ?)
+    ''', (datetime.now().isoformat(), json.dumps(params), batch_size, json.dumps(results_summary)))
     sim_id = cursor.lastrowid
     conn.commit()
     conn.close()
@@ -37,11 +47,9 @@ def save_simulation(params, results):
 def get_simulations():
     conn = get_conn()
     cur = conn.cursor()
-    cur.execute('SELECT id, timestamp, params FROM simulations ORDER BY timestamp DESC LIMIT 20')
+    cur.execute('SELECT id, timestamp, params, batch_size FROM simulations ORDER BY timestamp DESC LIMIT 30')
     rows = cur.fetchall()
     conn.close()
-    
-    # Convertir el string JSON a diccionario real
     simulations = []
     for row in rows:
         sim = dict(row)
@@ -58,6 +66,6 @@ def get_simulation_by_id(sim_id):
     if row:
         sim = dict(row)
         sim['params'] = json.loads(sim['params'])
-        sim['results'] = json.loads(sim['results'])
+        sim['results_summary'] = json.loads(sim['results_summary'])
         return sim
     return None

@@ -10,10 +10,15 @@
     <div class="list-group">
         {% for sim in simulations %}
         <a href="{{ url_for('results', sim_id=sim.id) }}" class="list-group-item list-group-item-action">
-            <div class="d-flex w-100 justify-content-between">
-                <h5 class="mb-1">Simulación #{{ sim.id }}</h5>
-                <small>{{ sim.timestamp[:19] }}</small>
-            </div>
+			<div class="d-flex w-100 justify-content-between align-items-center">
+				<h5 class="mb-1">Simulación #{{ sim.id }}</h5>
+				<div>
+					<small class="text-muted me-3">{{ sim.timestamp[:19]|replace('T', ' ') }}</small>
+					<span class="badge bg-primary">
+						{{ sim.batch_size }} corrida{{ 's' if sim.batch_size != 1 else '' }}
+					</span>
+				</div>
+			</div>
             <p class="mb-1">
 				Devs: {{ sim.params['num_developers'] }} | 
 				Automatización: {{ (sim.params['automation_level']|float * 100)|int }}% | 

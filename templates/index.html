@@ -49,6 +49,16 @@
                             <label>Cantidad de Sprints a simular</label>
                             <input type="number" name="sprints" class="form-control" value="10" min="5" max="50">
                         </div>
+						<div class="mb-4">
+						<label class="form-label fw-bold">Cantidad de corridas Monte Carlo</label>
+							<div class="input-group">
+								<input type="number" name="batch_size" class="form-control" value="1" min="1" max="20000" step="1">
+								<span class="input-group-text">corridas</span>
+							</div>
+							<div class="form-text">
+								1 = simulación simple | 1000+ = análisis estadístico real
+							</div>
+						</div>
                         <button type="submit" class="btn btn-primary btn-lg">Ejecutar Simulación</button>
                     </form>
                 </div>
